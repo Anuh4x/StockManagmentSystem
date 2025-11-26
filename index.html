@@ -18,8 +18,7 @@
       background: rgba(255,255,255,0.6);
       backdrop-filter: blur(10px);
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       z-index: 1000;
       border-bottom: 1px solid rgba(0,0,0,0.1);
     }
@@ -72,6 +71,7 @@
     .cancel-btn { background: #888; }
   </style>
 </head>
+
 <body>
 
   <div class="top-bar">
@@ -120,11 +120,14 @@
     </div>
   </div>
 
-<!-- FIREBASE SCRIPTS -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+<!-- Firebase Script -->
+<script type="module">
 
-<script>
+  // Import Firebase SDK
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, set, push, get, child, remove }
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
   // Firebase Config
   const firebaseConfig = {
     apiKey: "AIzaSyBN9LWPP0tebZiCtXMAKatKivb5lX0g1_g",
@@ -137,77 +140,109 @@
     measurementId: "G-0VWDCPSVSX"
   };
 
-  // Init Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-  function openPopup() {
-    document.getElementById("popupBg").style.display = "flex";
+  // ---------- Open + Close Popup ----------
+  window.openPopup = () => document.getElementById('popupBg').style.display = 'flex';
+  window.closePopup = () => document.getElementById('popupBg').style.display = 'none';
+
+  // ---------- Load Stock ----------
+  function loadStock() {
+    const dbRef = ref(db, "stock");
+
+    get(dbRef).then(snapshot => {
+      if (snapshot.exists()) {
+        const list = Object.values(snapshot.val());
+        displayStock(list);
+      } else {
+        displayStock([]);
+      }
+    });
   }
 
-  function closePopup() {
-    document.getElementById("popupBg").style.display = "none";
-  }
+  loadStock(); // Load on start
 
-  function addItem() {
+  // ---------- Add Item ----------
+  window.addItem = function () {
     const item = {
+      id: Date.now(),
       name: pname.value,
       vehicle: vehicle.value,
       partno: partno.value,
       stock: stock.value,
       buy: buy.value,
-      sell: sell.value,
+      sell: sell.value
     };
 
-    db.ref("parts/" + item.partno).set(item);
+    const newRef = push(ref(db, "stock"));
+    set(newRef, item).then(() => {
+      closePopup();
+      loadStock();
+      document.querySelectorAll('.popup input').forEach(i => i.value = "");
+    });
+  };
 
-    closePopup();
-    loadStock();
+  // ---------- Delete Item ----------
+  window.deleteItem = function (id) {
+    const dbRef = ref(db, "stock");
 
-    document.querySelectorAll(".popup input").forEach(i => i.value = "");
-  }
+    get(dbRef).then(snapshot => {
+      if (!snapshot.exists()) return;
 
-  function deleteItem(partno) {
-    db.ref("parts/" + partno).remove();
-  }
+      const data = snapshot.val();
+      const key = Object.keys(data).find(k => data[k].id === id);
 
-  function loadStock() {
-    db.ref("parts").on("value", snap => {
-      const table = document.getElementById("stockTable");
-      table.innerHTML = "";
+      if (key) {
+        remove(child(dbRef, key)).then(() => loadStock());
+      }
+    });
+  };
 
-      snap.forEach(child => {
-        let item = child.val();
+  // ---------- Display Stock ----------
+  function displayStock(data) {
+    const table = document.getElementById("stockTable");
+    table.innerHTML = "";
 
-        table.innerHTML += `
-          <tr>
-            <td>${item.name}</td>
-            <td>${item.vehicle}</td>
-            <td>${item.partno}</td>
-            <td>${item.stock}</td>
-            <td>${item.buy}</td>
-            <td>${item.sell}</td>
-            <td>
-              <button onclick="deleteItem('${item.partno}')" style="background:none; border:none; cursor:pointer;">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23dc3545'%3E%3Cpath d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-9l-1 1H5v2h14V4z'/%3E%3C/svg%3E" width="20"/>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
+    data.forEach(item => {
+      table.innerHTML += `
+      <tr>
+        <td>${item.name}</td>
+        <td>${item.vehicle}</td>
+        <td>${item.partno}</td>
+        <td>${item.stock}</td>
+        <td>${item.buy}</td>
+        <td>${item.sell}</td>
+        <td>
+          <button onclick="deleteItem(${item.id})" 
+            style="background:none; border:none; cursor:pointer; font-size:22px;">
+            🗑️
+          </button>
+        </td>
+      </tr>`;
     });
   }
 
-  loadStock();
+  // ---------- Search Filter ----------
+  window.filterStock = function () {
+    const text = searchInput.value.toLowerCase();
 
-  function filterStock() {
-    const q = searchInput.value.toLowerCase();
-    const rows = document.querySelectorAll("#stockTable tr");
+    const dbRef = ref(db, "stock");
 
-    rows.forEach(row => {
-      row.style.display = row.innerText.toLowerCase().includes(q) ? "" : "none";
+    get(dbRef).then(snapshot => {
+      if (!snapshot.exists()) return;
+
+      const all = Object.values(snapshot.val());
+      const filtered = all.filter(i =>
+        i.name.toLowerCase().includes(text) ||
+        i.partno.toLowerCase().includes(text)
+      );
+
+      displayStock(filtered);
     });
-  }
+  };
+
 </script>
 
 </body>
