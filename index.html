@@ -93,6 +93,7 @@
             <th>Stock</th>
             <th>Buy Price</th>
             <th>Sell Price</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="stockTable"></tbody>
@@ -104,9 +105,10 @@
   <div class="popup-bg" id="popupBg">
     <div class="popup">
       <h3>Add New Part</h3>
-      <input type="text" id="partno" placeholder="Part Number" />
+
       <input type="text" id="pname" placeholder="Part Name" />
       <input type="text" id="vehicle" placeholder="Vehicle" />
+      <input type="text" id="partno" placeholder="Part Number" />
       <input type="number" id="stock" placeholder="Stock Amount" />
       <input type="number" id="buy" placeholder="Buy Price" />
       <input type="number" id="sell" placeholder="Sell Price" />
@@ -166,9 +168,9 @@
   window.addItem = function () {
     const item = {
       id: Date.now(),
-      partno: partno.value,
       name: pname.value,
       vehicle: vehicle.value,
+      partno: partno.value,
       stock: stock.value,
       buy: buy.value,
       sell: sell.value
@@ -183,28 +185,28 @@
   };
 
   // ---------- Delete Item ----------
-  window.deleteItem = function (id) {
-    const dbRef = ref(db, "stock");
+window.deleteItem = function (id) {
+  const dbRef = ref(db, "stock");
 
-    get(dbRef).then(snapshot => {
-      if (!snapshot.exists()) return;
+  get(dbRef).then(snapshot => {
+    if (!snapshot.exists()) return;
 
-      const data = snapshot.val();
-      const key = Object.keys(data).find(k => data[k].id === id);
+    const data = snapshot.val();
+    const key = Object.keys(data).find(k => data[k].id === id);
 
-      if (key) {
-        remove(child(dbRef, key)).then(() => loadStock());
-      }
-    });
-  };
+    if (key) {
+      remove(child(dbRef, key)).then(() => loadStock());
+    }
+  });
+};
 
   // ---------- Display Stock ----------
-  function displayStock(data) {
-    const table = document.getElementById("stockTable");
-    table.innerHTML = "";
+function displayStock(data) {
+  const table = document.getElementById("stockTable");
+  table.innerHTML = "";
 
-    data.forEach(item => {
-      table.innerHTML += `
+  data.forEach(item => {
+    table.innerHTML += `
       <tr>
         <td>${item.partno}</td>
         <td>${item.name}</td>
@@ -213,14 +215,18 @@
         <td>${item.buy}</td>
         <td>${item.sell}</td>
         <td>
-            <button onclick="deleteItem('${item.partno}')" style="background:none; border:none; cursor:pointer;">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23dc3545'%3E%3Cpath d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-9l-1 1H5v2h14V4z'/%3E%3C/svg%3E" width="20"/>
-            </button>
-            </td>
-      </tr>`;
-    });
-  }
-
+          <button onclick="deleteItem(${item.id})"
+            style="background:none; border:none; cursor:pointer;">
+            <img 
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23dc3545'%3E%3Cpath d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-9l-1 1H5v2h14V4z'/%3E%3C/svg%3E"
+              width="20"
+            />
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+}
   // ---------- Search Filter ----------
   window.filterStock = function () {
     const text = searchInput.value.toLowerCase();
