@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spare Part Stock Management</title>
 
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: #f5f7fa; color: #333; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
 
     .top-bar {
       width: 100%;
@@ -15,12 +25,23 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255,255,255,0.6);
+      background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(10px);
       position: fixed;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       z-index: 1000;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .add-btn-overlay {
+      position: absolute;
+      top: -27px;
+      left: 0px;
+      z-index: 20;
+      padding: 12px 22px;
+      transform: translateY(-50%);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
     }
 
     .btn {
@@ -32,55 +53,121 @@
       cursor: pointer;
     }
 
-    .container { padding: 100px 20px 40px; max-width: 1100px; margin: auto; }
-
-    .glass-card {
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(12px);
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    .container {
+      padding: 100px 20px 40px;
+      max-width: 1100px;
+      margin: auto;
     }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+    .glass-card {
+      margin-top: 12px;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(12px);
+      padding: 34px 20px 28px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
 
     /* Popup */
     .popup-bg {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
       display: none;
       justify-content: center;
       align-items: center;
     }
 
     .popup {
-      width: 90%; max-width: 400px;
-      background: rgba(255,255,255,0.75);
+      width: 90%;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(15px);
       padding: 25px;
       border-radius: 20px;
-      box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
     }
 
-    input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #bbb; margin-top: 10px; }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #bbb;
+      margin-top: 10px;
+    }
 
-    .btn-row { display: flex; gap: 10px; margin-top: 15px; }
-    .cancel-btn { background: #888; }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .cancel-btn {
+      background: #888;
+    }
+
+    @media (max-width: 600px) {
+
+  .glass-card {
+    padding: 22px 12px;
+  }
+
+  th, td {
+    font-size: 0.8rem;
+    padding: 10px 6px;
+  }
+
+  /* Let table scroll horizontally on small screens */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .add-btn-overlay {
+    right: 10px;
+    top: -27px;
+    left: 5px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    padding: 9px 14px;
+    font-size: 0.9rem;
+  }
+}
   </style>
 </head>
 
 <body>
 
-  <div class="top-bar">
+  <div class="top-bar" style="display:flex; justify-content:space-between; align-items:center;">
     <div class="logo" style="font-size:1.4rem; font-weight:bold;">Gangani Auto Electricals</div>
-    <button class="btn" onclick="openPopup()">Add Item</button>
+    <!-- Removed Add Item from top-bar so it can sit on the card -->
   </div>
 
   <div class="container">
+    <!-- Add Item button moved here and positioned over the glass card -->
     <div class="glass-card">
+      <button class="btn add-btn-overlay" onclick="openPopup()">Add Item</button>
       <h2>Search Stock</h2>
       <input type="text" id="searchInput" placeholder="Search part name or number..." onkeyup="filterStock()" />
 
@@ -120,93 +207,93 @@
     </div>
   </div>
 
-<!-- Firebase Script -->
-<script type="module">
+  <!-- Firebase Script -->
+  <script type="module">
 
-  // Import Firebase SDK
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, set, push, get, child, remove }
-    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, set, push, get, child, remove }
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-  // Firebase Config
-  const firebaseConfig = {
-    apiKey: "AIzaSyBN9LWPP0tebZiCtXMAKatKivb5lX0g1_g",
-    authDomain: "shopstock-d304a.firebaseapp.com",
-    databaseURL: "https://shopstock-d304a-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "shopstock-d304a",
-    storageBucket: "shopstock-d304a.firebasestorage.app",
-    messagingSenderId: "82450149368",
-    appId: "1:82450149368:web:3772ec3a4d96d8c1ecf00d",
-    measurementId: "G-0VWDCPSVSX"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // ---------- Open + Close Popup ----------
-  window.openPopup = () => document.getElementById('popupBg').style.display = 'flex';
-  window.closePopup = () => document.getElementById('popupBg').style.display = 'none';
-
-  // ---------- Load Stock ----------
-  function loadStock() {
-    const dbRef = ref(db, "stock");
-
-    get(dbRef).then(snapshot => {
-      if (snapshot.exists()) {
-        const list = Object.values(snapshot.val());
-        displayStock(list);
-      } else {
-        displayStock([]);
-      }
-    });
-  }
-
-  loadStock(); // Load on start
-
-  // ---------- Add Item ----------
-  window.addItem = function () {
-    const item = {
-      id: Date.now(),
-      name: pname.value,
-      vehicle: vehicle.value,
-      partno: partno.value,
-      stock: stock.value,
-      buy: buy.value,
-      sell: sell.value
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBN9LWPP0tebZiCtXMAKatKivb5lX0g1_g",
+      authDomain: "shopstock-d304a.firebaseapp.com",
+      databaseURL: "https://shopstock-d304a-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "shopstock-d304a",
+      storageBucket: "shopstock-d304a.firebasestorage.app",
+      messagingSenderId: "82450149368",
+      appId: "1:82450149368:web:3772ec3a4d96d8c1ecf00d",
+      measurementId: "G-0VWDCPSVSX"
     };
 
-    const newRef = push(ref(db, "stock"));
-    set(newRef, item).then(() => {
-      closePopup();
-      loadStock();
-      document.querySelectorAll('.popup input').forEach(i => i.value = "");
-    });
-  };
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  // ---------- Delete Item ----------
-window.deleteItem = function (id) {
-  const dbRef = ref(db, "stock");
+    // ---------- Open + Close Popup ----------
+    window.openPopup = () => document.getElementById('popupBg').style.display = 'flex';
+    window.closePopup = () => document.getElementById('popupBg').style.display = 'none';
 
-  get(dbRef).then(snapshot => {
-    if (!snapshot.exists()) return;
+    // ---------- Load Stock ----------
+    function loadStock() {
+      const dbRef = ref(db, "stock");
 
-    const data = snapshot.val();
-    const key = Object.keys(data).find(k => data[k].id === id);
-
-    if (key) {
-      remove(child(dbRef, key)).then(() => loadStock());
+      get(dbRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const list = Object.values(snapshot.val());
+          displayStock(list);
+        } else {
+          displayStock([]);
+        }
+      });
     }
-  });
-};
 
-  // ---------- Display Stock ----------
-function displayStock(data) {
-  const table = document.getElementById("stockTable");
-  table.innerHTML = "";
+    loadStock(); // Load on start
 
-  data.forEach(item => {
-    table.innerHTML += `
+    // ---------- Add Item ----------
+    window.addItem = function () {
+      const item = {
+        id: Date.now(),
+        name: pname.value,
+        vehicle: vehicle.value,
+        partno: partno.value,
+        stock: stock.value,
+        buy: buy.value,
+        sell: sell.value
+      };
+
+      const newRef = push(ref(db, "stock"));
+      set(newRef, item).then(() => {
+        closePopup();
+        loadStock();
+        document.querySelectorAll('.popup input').forEach(i => i.value = "");
+      });
+    };
+
+    // ---------- Delete Item ----------
+    window.deleteItem = function (id) {
+      const dbRef = ref(db, "stock");
+
+      get(dbRef).then(snapshot => {
+        if (!snapshot.exists()) return;
+
+        const data = snapshot.val();
+        const key = Object.keys(data).find(k => data[k].id === id);
+
+        if (key) {
+          remove(child(dbRef, key)).then(() => loadStock());
+        }
+      });
+    };
+
+    // ---------- Display Stock ----------
+    function displayStock(data) {
+      const table = document.getElementById("stockTable");
+      table.innerHTML = "";
+
+      data.forEach(item => {
+        table.innerHTML += `
       <tr>
         <td>${item.partno}</td>
         <td>${item.name}</td>
@@ -225,28 +312,29 @@ function displayStock(data) {
         </td>
       </tr>
     `;
-  });
-}
-  // ---------- Search Filter ----------
-  window.filterStock = function () {
-    const text = searchInput.value.toLowerCase();
+      });
+    }
+    // ---------- Search Filter ----------
+    window.filterStock = function () {
+      const text = searchInput.value.toLowerCase();
 
-    const dbRef = ref(db, "stock");
+      const dbRef = ref(db, "stock");
 
-    get(dbRef).then(snapshot => {
-      if (!snapshot.exists()) return;
+      get(dbRef).then(snapshot => {
+        if (!snapshot.exists()) return;
 
-      const all = Object.values(snapshot.val());
-      const filtered = all.filter(i =>
-        i.name.toLowerCase().includes(text) ||
-        i.partno.toLowerCase().includes(text)
-      );
+        const all = Object.values(snapshot.val());
+        const filtered = all.filter(i =>
+          i.name.toLowerCase().includes(text) ||
+          i.partno.toLowerCase().includes(text)
+        );
 
-      displayStock(filtered);
-    });
-  };
+        displayStock(filtered);
+      });
+    };
 
-</script>
+  </script>
 
 </body>
+
 </html>
